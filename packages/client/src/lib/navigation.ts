@@ -1,0 +1,1 @@
+export const isCurentPage = (path: string) => window.location.pathname === path;

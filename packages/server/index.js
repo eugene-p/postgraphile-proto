@@ -30,6 +30,7 @@ const middleware = postgraphile(DB_URL, ['app_public', 'app_private'], {
   dynamicJson: true,
   setofFunctionsContainNulls: false,
   ignoreRBAC: false,
+  enableCors: true,
 })
 
 const fastify = Fastify({ logger: true })
