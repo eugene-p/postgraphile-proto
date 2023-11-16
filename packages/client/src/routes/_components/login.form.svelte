@@ -1,76 +1,67 @@
 <script>
+	import { loginUser, setAuthToken } from '$lib/auth';
 	import { formDataToJson } from '$lib/formData';
-	import LoginMutation from '$graphql/mutations/LoginMutation';
-	import { getContextClient, mutationStore } from '@urql/svelte';
-	import { Button, FloatingLabelInput, TabItem, Tabs } from 'flowbite-svelte';
-	// @ts-ignore
-	import { ArrowLeftToBracketOutline, FilePenOutline } from 'flowbite-svelte-icons';
+	import { Alert, Button, FloatingLabelInput, Spinner } from 'flowbite-svelte';
+	import { ArrowLeftToBracketOutline } from 'flowbite-svelte-icons';
 
+	import {  getContextClient } from '@urql/svelte';
+	import { goto } from '$app/navigation';
 	const client = getContextClient();
 
-	/**
-	 * @param EventHandler<SubmitEvent, HTMLFormElement> evt  form submit event
-	 * @returns {void}
-	 */
-	const login = (evt) => {
+	$: loginFetching = false;
+	$: loginError = undefined;
+	$: resultData = null;
+
+	$: if (resultData?.authorize?.jwtToken) {
+		setAuthToken(resultData.authorize.jwtToken);
+		goto('/about');
+	}
+
+	const login = async (evt) => {
 		try {
 			const { target } = evt;
-			const loginData = new FormData(target);
+			const loginData = formDataToJson(new FormData(target));
 
-			// @ts-ignore
-			const loginUser = ({ email, password }) => {
-				return mutationStore({
-					client,
-					query: LoginMutation,
-					variables: { email, password }
-				});
-			};
+			const login = await loginUser(
+				loginData.email.toString(),
+				loginData.password.toString(),
+				client
+			);
 
-			loginUser(formDataToJson(loginData));
+			login.subscribe(
+				(result) => {
+					loginFetching = result.fetching;
+					loginError = result.error;
+					resultData = result.data;
+				},
+				(error) => {
+					console.log(error, 'error');
+				}
+			);
+
 		} catch (error) {
 			console.log(error);
 		}
 	};
-
-	/**
-	 * @param EventHandler<SubmitEvent, HTMLFormElement> evt  form submit event
-	 * @returns {void}
-	 */
-	const register = ({ target }) => {
-		const registerData = new FormData(target);
-
-		console.log('register', formDataToJson(registerData));
-	};
 </script>
 
-<div class="w-full max-w-md mx-auto">
-	<Tabs style="underline" defaultClass="flex flex-row flex-grow">
-		<TabItem class="w-full" open defaultClass="w-full">
-			<span slot="title">Login</span>
-			<form class="flex flex-col space-y-6" on:submit|preventDefault={login}>
-				<FloatingLabelInput label="Email" type="email" name="email">Email</FloatingLabelInput>
-				<FloatingLabelInput label="Password" type="password" name="password"
-					>Password</FloatingLabelInput
-				>
-				<Button type="submit" size="md">
-					<ArrowLeftToBracketOutline class="w-4 h-4 mr-2" />
-					Login
-				</Button>
-			</form>
-		</TabItem>
-		<TabItem class="w-full" defaultClass="w-full">
-			<span slot="title">Register</span>
-			<form class="flex flex-col space-y-6" on:submit={register}>
-				<FloatingLabelInput label="Email" type="text" name="name">Name</FloatingLabelInput>
-				<FloatingLabelInput label="Email" type="email" name="email">Email</FloatingLabelInput>
-				<FloatingLabelInput label="Password" type="password" name="password"
-					>Password</FloatingLabelInput
-				>
-				<Button type="submit" size="md">
-					<FilePenOutline class="w-3.5 h-3.5 mr-2" />
-					Register
-				</Button>
-			</form>
-		</TabItem>
-	</Tabs>
-</div>
+
+{#if loginFetching}
+	<Spinner />
+{:else}
+	<form class="flex flex-col space-y-6" on:submit|preventDefault={login}>
+		{#if loginError}
+			<Alert color="red">
+				{loginError.message.replace('[GraphQL] ', '')}
+			</Alert>
+		{/if}
+		<FloatingLabelInput label="Email" type="email" name="email">Email</FloatingLabelInput>
+		<FloatingLabelInput label="Password" type="password" name="password"
+			>Password</FloatingLabelInput
+		>
+		<Button type="submit" size="md">
+			<ArrowLeftToBracketOutline class="w-4 h-4 mr-2" />
+			Login
+		</Button>
+	</form>
+{/if}

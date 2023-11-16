@@ -1,1 +1,2 @@
-// place files you want to import through the `$lib` alias in this folder.
+export { formDataToJson } from "./formData";
+export {isCurentPage} from "./navigation"

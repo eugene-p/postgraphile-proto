@@ -22,6 +22,7 @@ FROM nginx:alpine
 
 # Copy the static site files to the Nginx container
 COPY --from=build /app/build /usr/share/nginx/html
+COPY ./nginx/nginx.conf /etc/nginx/conf.d/default.conf
 
 # Expose port 80 for HTTP traffic
 EXPOSE 80
