@@ -5,7 +5,7 @@
 	import { Footer, FooterCopyright, NavBrand, NavHamburger, NavLi, NavUl, Navbar} from 'flowbite-svelte';
 	import '../app.css';
 	import { setContextClient } from '@urql/svelte';
-	import { gqlClient } from '$lib/grapql/client';
+	import { gqlClient } from '$graphql/client';
 	const navLinks = [
 		{ name: 'Index', href: '/' },
 		{ name: 'About', href: '/about' }

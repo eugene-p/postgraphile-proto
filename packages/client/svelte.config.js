@@ -19,7 +19,11 @@ const config = {
 			fallback: 'index.html',
 			precompress: false,
 			strict: true
-		})
+		}),
+		alias: {
+			$components: './src/lib/components',
+			$graphql: './src/lib/graphql'
+		}
 	}
 };
 

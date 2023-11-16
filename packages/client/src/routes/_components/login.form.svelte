@@ -1,6 +1,6 @@
 <script>
 	import { formDataToJson } from '$lib/formData';
-	import LoginMutation from '$lib/grapql/mutations/LoginMutation';
+	import LoginMutation from '$graphql/mutations/LoginMutation';
 	import { getContextClient, mutationStore } from '@urql/svelte';
 	import { Button, FloatingLabelInput, TabItem, Tabs } from 'flowbite-svelte';
 	// @ts-ignore
